@@ -15,8 +15,8 @@ func TestEncodeBase64(t *testing.T) {
 }
 
 func TestDecodeBase64(t *testing.T) {
-	pw_cost, hash, salt, err := DecodeBase64("12:QUFB:QUFB")
-	assert.Equal(t, pw_cost, uint(12))
+	paramId, hash, salt, err := DecodeBase64("12:QUFB:QUFB")
+	assert.Equal(t, paramId, uint(12))
 	assert.Equal(t, hash, []byte("AAA"))
 	assert.Equal(t, salt, []byte("AAA"))
 	assert.Equal(t, err, nil)
@@ -24,9 +24,9 @@ func TestDecodeBase64(t *testing.T) {
 
 func TestEncodeDecodeBase64(t *testing.T) {
 	str_ref := "12:3Tnrsg5-QaM7OsyRvqcBv9qS-jqGxzRIXQqvbTUf894=:HrHzQ4S016BffZ2TmwLRYYiIggfSmkwKdEtd1Pk_b-I="
-	pw_cost, hash, salt, err := DecodeBase64(str_ref)
+	paramId, hash, salt, err := DecodeBase64(str_ref)
 	assert.Equal(t, err, nil)
-	str := EncodeBase64(pw_cost, hash, salt)
+	str := EncodeBase64(paramId, hash, salt)
 	assert.Equal(t, str, str_ref)
 }
 
@@ -61,12 +61,12 @@ func ExampleDecodeBase64() {
 		return
 	}
 
-	pw_cost, hash, salt, err := DecodeBase64(db_string)
+	paramId, hash, salt, err := DecodeBase64(db_string)
 	if err != nil {
 		fmt.Print(err)
 		return
 	}
-	ok, err := pwhash.Check(pw_cost, hash, user_password, salt)
+	ok, err := pwhash.Check(paramId, hash, user_password, salt)
 	if !ok {
 		fmt.Printf("Error wrong password for user (%s)", err)
 		return

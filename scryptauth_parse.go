@@ -8,15 +8,15 @@ import (
 	"strings"
 )
 
-// Parses "pw_cost:base64(hash):base64(salt)"
-func DecodeBase64(str string) (pw_cost uint, hash, salt []byte, err error) {
+// Parses "paramId:base64(hash):base64(salt)"
+func DecodeBase64(str string) (paramId uint, hash, salt []byte, err error) {
 	tmp := strings.SplitN(str, ":", 3)
-	tmp_pwcost, err := strconv.ParseUint(tmp[0], 10, 0)
+	tmpParamId, err := strconv.ParseUint(tmp[0], 10, 0)
 	if err != nil {
-		err = errors.New("Error: parsing pw_cost parameter")
+		err = errors.New("Error: parsing paramId parameter")
 		return
 	}
-	pw_cost = uint(tmp_pwcost)
+	paramId = uint(tmpParamId)
 	hash, err = base64.URLEncoding.DecodeString(tmp[1])
 	if err != nil {
 		err = errors.New("Error: decoding base64 hash")
@@ -30,10 +30,10 @@ func DecodeBase64(str string) (pw_cost uint, hash, salt []byte, err error) {
 	return
 }
 
-// Encodes into "pw_cost:base64(hash):base64(salt)"
-func EncodeBase64(pw_cost uint, hash, salt []byte) (str string) {
+// Encodes into "paramId:base64(hash):base64(salt)"
+func EncodeBase64(paramId uint, hash, salt []byte) (str string) {
 	b64_salt := base64.URLEncoding.EncodeToString(salt)
 	b64_hash := base64.URLEncoding.EncodeToString(hash)
-	str = fmt.Sprintf("%d:%s:%s", pw_cost, b64_hash, b64_salt)
+	str = fmt.Sprintf("%d:%s:%s", paramId, b64_hash, b64_salt)
 	return
 }
