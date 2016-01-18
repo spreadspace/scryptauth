@@ -10,20 +10,20 @@ import (
 func TestEncodeBase64(t *testing.T) {
 	str := []byte("AAA")
 	str_b64 := base64.URLEncoding.EncodeToString(str)
-	a := EncodeBase64(12, str, str)
-	assert.Equal(t, a, "12:"+str_b64+":"+str_b64)
+	a := EncodeBase64(17, str, str)
+	assert.Equal(t, a, "17:"+str_b64+":"+str_b64)
 }
 
 func TestDecodeBase64(t *testing.T) {
-	paramId, hash, salt, err := DecodeBase64("12:QUFB:QUFB")
-	assert.Equal(t, paramId, uint(12))
+	paramId, hash, salt, err := DecodeBase64("17:QUFB:QUFB")
+	assert.Equal(t, paramId, uint(17))
 	assert.Equal(t, hash, []byte("AAA"))
 	assert.Equal(t, salt, []byte("AAA"))
 	assert.Equal(t, err, nil)
 }
 
 func TestEncodeDecodeBase64(t *testing.T) {
-	str_ref := "12:3Tnrsg5-QaM7OsyRvqcBv9qS-jqGxzRIXQqvbTUf894=:HrHzQ4S016BffZ2TmwLRYYiIggfSmkwKdEtd1Pk_b-I="
+	str_ref := "17:3Tnrsg5-QaM7OsyRvqcBv9qS-jqGxzRIXQqvbTUf894=:HrHzQ4S016BffZ2TmwLRYYiIggfSmkwKdEtd1Pk_b-I="
 	paramId, hash, salt, err := DecodeBase64(str_ref)
 	assert.Equal(t, err, nil)
 	str := EncodeBase64(paramId, hash, salt)
@@ -51,22 +51,24 @@ func ExampleEncodeBase64() {
 
 // Sample function to verify stored hash from DB
 func ExampleDecodeBase64() {
-	db_string := "12:3Tnrsg5-QaM7OsyRvqcBv9qS-jqGxzRIXQqvbTUf894=:HrHzQ4S016BffZ2TmwLRYYiIggfSmkwKdEtd1Pk_b-I="
-	hmac_key := []byte("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA") // PLEASE CHANGE THIS KEY FOR PRODUCTION USE
-	user_password := []byte("bar")
-
-	pwhash, err := New(12, hmac_key)
+	db_string := "17:3Tnrsg5-QaM7OsyRvqcBv9qS-jqGxzRIXQqvbTUf894=:HrHzQ4S016BffZ2TmwLRYYiIggfSmkwKdEtd1Pk_b-I="
+	hashes := make(map[uint]*ScryptAuth)
+	pwhash, err := New(12, []byte("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")) // PLEASE CHANGE THIS KEY FOR PRODUCTION USE
 	if err != nil {
 		fmt.Print(err)
 		return
 	}
+	hashes[17] = pwhash
+
+	user_password := []byte("bar")
 
 	paramId, hash, salt, err := DecodeBase64(db_string)
 	if err != nil {
 		fmt.Print(err)
 		return
 	}
-	ok, err := pwhash.Check(paramId, hash, user_password, salt)
+
+	ok, err := hashes[paramId].Check(hash, user_password, salt)
 	if !ok {
 		fmt.Printf("Error wrong password for user (%s)", err)
 		return

@@ -51,8 +51,8 @@ func New(pw_cost uint, hmac_key []byte) (*ScryptAuth, error) {
 }
 
 // Create hash_ref suitable for later invocation of Check()
-func (s ScryptAuth) Hash(pw_cost uint, user_password, salt []byte) (hash_ref []byte, err error) {
-	scrypt_hash, err := scrypt.Key(user_password, salt, 1<<pw_cost, s.R, s.P, KEYLENGTH)
+func (s ScryptAuth) Hash(user_password, salt []byte) (hash_ref []byte, err error) {
+	scrypt_hash, err := scrypt.Key(user_password, salt, 1<<s.PwCost, s.R, s.P, KEYLENGTH)
 	if err != nil {
 		return
 	}
@@ -65,8 +65,8 @@ func (s ScryptAuth) Hash(pw_cost uint, user_password, salt []byte) (hash_ref []b
 }
 
 // Check / Verify user_password against hash_ref/salt
-func (s ScryptAuth) Check(pw_cost uint, hash_ref, user_password, salt []byte) (chk bool, err error) {
-	result_hash, err := s.Hash(pw_cost, user_password, salt)
+func (s ScryptAuth) Check(hash_ref, user_password, salt []byte) (chk bool, err error) {
+	result_hash, err := s.Hash(user_password, salt)
 	if err != nil {
 		return false, err
 	}
@@ -87,7 +87,7 @@ func (s ScryptAuth) Gen(user_password []byte) (hash, salt []byte, err error) {
 		return nil, nil, err
 	}
 
-	hash, err = s.Hash(s.PwCost, user_password, salt)
+	hash, err = s.Hash(user_password, salt)
 	if err != nil {
 		return nil, nil, err
 	}

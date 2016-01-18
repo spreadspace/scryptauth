@@ -10,17 +10,19 @@ var (
 	x        *ScryptAuth
 	salt     []byte
 	hmac_key []byte
+	pw_cost  uint
 	result   []byte
 )
 
 func init() {
 	hmac_key = []byte("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
-	x, _ = New(12, hmac_key)
+	pw_cost = 12
+	x, _ = New(pw_cost, hmac_key)
 	fmt.Sscanf("1eb1f34384b4d7a05f7d9d939b02d16188888207d29a4c0a744b5dd4f93f6fe2", "%x", &salt)
 }
 
 func TestNew(t *testing.T) {
-	tmp, err := New(12, hmac_key)
+	tmp, err := New(pw_cost, hmac_key)
 	assert.Equal(t, err, nil)
 
 	tmp, err = New(33, hmac_key)
@@ -37,7 +39,7 @@ func TestHash(t *testing.T) {
 	   }
 	*/
 
-	h, err := x.Hash(x.PwCost, []byte("bar"), salt)
+	h, err := x.Hash([]byte("bar"), salt)
 	assert.Equal(t, err, nil)
 	hash := fmt.Sprintf("%x", h)
 
@@ -45,9 +47,9 @@ func TestHash(t *testing.T) {
 }
 
 func TestHashCheck(t *testing.T) {
-	h, err := x.Hash(x.PwCost, []byte("bar"), salt)
+	h, err := x.Hash([]byte("bar"), salt)
 	assert.Equal(t, err, nil)
-	ok, err := x.Check(x.PwCost, h, []byte("bar"), salt)
+	ok, err := x.Check(h, []byte("bar"), salt)
 	assert.Equal(t, ok, true)
 	assert.Equal(t, err, nil)
 }
@@ -58,16 +60,17 @@ func TestGenCheck(t *testing.T) {
 	assert.NotEqual(t, h, nil)
 	assert.NotEqual(t, s, nil)
 
-	ok, err := x.Check(x.PwCost, h, []byte("bar"), s)
+	ok, err := x.Check(h, []byte("bar"), s)
 	assert.Equal(t, ok, true)
 	assert.Equal(t, err, nil)
 }
 
-func benchmarkScrypt(i int, b *testing.B) {
+func benchmarkScrypt(i uint, b *testing.B) {
+	y, _ := New(i, hmac_key)
 	user_pw := []byte("bar")
 	var r []byte
 	for n := 0; n < b.N; n++ {
-		r, _ = x.Hash(uint(i), user_pw, salt)
+		r, _ = y.Hash(user_pw, salt)
 	}
 	result = r
 }
