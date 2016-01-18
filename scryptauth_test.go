@@ -7,7 +7,7 @@ import (
 )
 
 var (
-	x        *ScryptAuth
+	x        *Context
 	salt     []byte
 	hmac_key []byte
 	pw_cost  uint
@@ -27,7 +27,7 @@ func TestNew(t *testing.T) {
 
 	tmp, err = New(33, hmac_key)
 	assert.NotEqual(t, err, nil)
-	assert.Equal(t, tmp, (*ScryptAuth)(nil))
+	assert.Equal(t, tmp, (*Context)(nil))
 }
 
 func TestHash(t *testing.T) {
@@ -88,18 +88,18 @@ func BenchmarkScrypt17(b *testing.B) { benchmarkScrypt(17, b) }
 func BenchmarkScrypt18(b *testing.B) { benchmarkScrypt(18, b) }
 func BenchmarkScrypt19(b *testing.B) { benchmarkScrypt(19, b) }
 
-// Example function showing usage of generating hash of user_password
-func ExampleScryptAuth_Gen() {
+// Example function showing usage of generating hash of password
+func ExampleContextGen() {
 	hmac_key := []byte("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA") // PLEASE CHANGE THIS KEY FOR PRODUCTION USE
 	user_password := []byte("test123")
 
 	// Create new instace of scryptauth with strength factor 12 and hmac_key
-	pwhash, err := New(12, hmac_key)
+	ctx, err := New(12, hmac_key)
 	if err != nil {
 		fmt.Print(err)
 		return
 	}
-	hash, salt, err := pwhash.Gen(user_password)
+	hash, salt, err := ctx.Gen(user_password)
 	if err != nil {
 		fmt.Print(err)
 		return

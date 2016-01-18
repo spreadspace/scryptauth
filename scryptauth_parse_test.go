@@ -35,30 +35,30 @@ func ExampleEncodeBase64() {
 	hmac_key := []byte("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA") // PLEASE CHANGE THIS KEY FOR PRODUCTION USE
 	user_password := []byte("test123")
 
-	pwhash, err := New(12, hmac_key)
+	ctx, err := New(12, hmac_key)
 	if err != nil {
 		fmt.Print(err)
 		return
 	}
-	hash, salt, err := pwhash.Gen(user_password)
+	hash, salt, err := ctx.Gen(user_password)
 	if err != nil {
 		fmt.Print(err)
 		return
 	}
-	str := EncodeBase64(pwhash.PwCost, hash, salt)
+	str := EncodeBase64(ctx.PwCost, hash, salt)
 	fmt.Print(str)
 }
 
 // Sample function to verify stored hash from DB
 func ExampleDecodeBase64() {
 	db_string := "17:3Tnrsg5-QaM7OsyRvqcBv9qS-jqGxzRIXQqvbTUf894=:HrHzQ4S016BffZ2TmwLRYYiIggfSmkwKdEtd1Pk_b-I="
-	hashes := make(map[uint]*ScryptAuth)
-	pwhash, err := New(12, []byte("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")) // PLEASE CHANGE THIS KEY FOR PRODUCTION USE
+	contexts := make(map[uint]*Context)
+	ctx, err := New(12, []byte("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")) // PLEASE CHANGE THIS KEY FOR PRODUCTION USE
 	if err != nil {
 		fmt.Print(err)
 		return
 	}
-	hashes[17] = pwhash
+	contexts[17] = ctx
 
 	user_password := []byte("bar")
 
@@ -68,7 +68,7 @@ func ExampleDecodeBase64() {
 		return
 	}
 
-	ok, err := hashes[paramId].Check(hash, user_password, salt)
+	ok, err := contexts[paramId].Check(hash, user_password, salt)
 	if !ok {
 		fmt.Printf("Error wrong password for user (%s)", err)
 		return

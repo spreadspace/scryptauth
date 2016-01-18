@@ -22,7 +22,7 @@ import (
 	"golang.org/x/crypto/scrypt"
 )
 
-type ScryptAuth struct {
+type Context struct {
 	HmacKey []byte // HMAC key used to secure scrypt hash
 	PwCost  uint   // PwCost parameter used to calculate N parameter of scrypt (1<<PwCost == N)
 	R       int    // r parameter of scrypt
@@ -38,24 +38,24 @@ const (
 	DefaultP = 1
 )
 
-// Initialise ScryptAuth struct
-func New(pwCost uint, hmacKey []byte) (*ScryptAuth, error) {
+// Initialise Context struct
+func New(pwCost uint, hmacKey []byte) (*Context, error) {
 	if pwCost > 32 {
 		return nil, errors.New("scryptauth new() - invalid pwCost specified")
 	}
 	if len(hmacKey) != KeyLength {
 		return nil, errors.New("scryptauth new() - unsupported hmacKey length")
 	}
-	return &ScryptAuth{HmacKey: hmacKey, PwCost: pwCost, R: DefaultR, P: DefaultP}, nil
+	return &Context{HmacKey: hmacKey, PwCost: pwCost, R: DefaultR, P: DefaultP}, nil
 }
 
 // Create hash suitable for later invocation of Check()
-func (s ScryptAuth) Hash(password, salt []byte) (hash []byte, err error) {
-	scrypt_hash, err := scrypt.Key(password, salt, 1<<s.PwCost, s.R, s.P, KeyLength)
+func (c Context) Hash(password, salt []byte) (hash []byte, err error) {
+	scrypt_hash, err := scrypt.Key(password, salt, 1<<c.PwCost, c.R, c.P, KeyLength)
 	if err != nil {
 		return
 	}
-	hmac := hmac.New(sha256.New, s.HmacKey)
+	hmac := hmac.New(sha256.New, c.HmacKey)
 	if _, err = hmac.Write(scrypt_hash); err != nil {
 		return
 	}
@@ -64,8 +64,8 @@ func (s ScryptAuth) Hash(password, salt []byte) (hash []byte, err error) {
 }
 
 // Check / Verify password against hash/salt
-func (s ScryptAuth) Check(hash, password, salt []byte) (chk bool, err error) {
-	result_hash, err := s.Hash(password, salt)
+func (c Context) Check(hash, password, salt []byte) (chk bool, err error) {
+	result_hash, err := c.Hash(password, salt)
 	if err != nil {
 		return false, err
 	}
@@ -76,7 +76,7 @@ func (s ScryptAuth) Check(hash, password, salt []byte) (chk bool, err error) {
 }
 
 // Generate hash and create new salt from crypto.rand
-func (s ScryptAuth) Gen(password []byte) (hash, salt []byte, err error) {
+func (c Context) Gen(password []byte) (hash, salt []byte, err error) {
 	salt = make([]byte, KeyLength)
 	salt_length, err := rand.Read(salt)
 	if salt_length != KeyLength {
@@ -86,7 +86,7 @@ func (s ScryptAuth) Gen(password []byte) (hash, salt []byte, err error) {
 		return nil, nil, err
 	}
 
-	hash, err = s.Hash(password, salt)
+	hash, err = c.Hash(password, salt)
 	if err != nil {
 		return nil, nil, err
 	}
