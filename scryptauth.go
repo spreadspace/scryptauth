@@ -50,7 +50,7 @@ func New(pwCost uint, hmacKey []byte) (*Context, error) {
 }
 
 // Create hash suitable for later invocation of Check()
-func (c Context) Hash(password, salt []byte) (hash []byte, err error) {
+func (c *Context) Hash(password, salt []byte) (hash []byte, err error) {
 	scrypt_hash, err := scrypt.Key(password, salt, 1<<c.PwCost, c.R, c.P, KeyLength)
 	if err != nil {
 		return
@@ -64,7 +64,7 @@ func (c Context) Hash(password, salt []byte) (hash []byte, err error) {
 }
 
 // Check / Verify password against hash/salt
-func (c Context) Check(hash, password, salt []byte) (chk bool, err error) {
+func (c *Context) Check(hash, password, salt []byte) (chk bool, err error) {
 	result_hash, err := c.Hash(password, salt)
 	if err != nil {
 		return false, err
@@ -76,7 +76,7 @@ func (c Context) Check(hash, password, salt []byte) (chk bool, err error) {
 }
 
 // Generate hash and create new salt from crypto.rand
-func (c Context) Gen(password []byte) (hash, salt []byte, err error) {
+func (c *Context) Gen(password []byte) (hash, salt []byte, err error) {
 	salt = make([]byte, KeyLength)
 	salt_length, err := rand.Read(salt)
 	if salt_length != KeyLength {
