@@ -33,9 +33,11 @@ func TestEncodeDecodeBase64(t *testing.T) {
 // Sample Function to generate new password hash for storing in DB
 func ExampleEncodeBase64() {
 	hmac_key := []byte("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA") // PLEASE CHANGE THIS KEY FOR PRODUCTION USE
+	pw_cost := uint(12)
+	paramId := uint(17)
 	user_password := []byte("test123")
 
-	ctx, err := New(12, hmac_key)
+	ctx, err := New(pw_cost, hmac_key)
 	if err != nil {
 		fmt.Print(err)
 		return
@@ -45,7 +47,7 @@ func ExampleEncodeBase64() {
 		fmt.Print(err)
 		return
 	}
-	str := EncodeBase64(ctx.PwCost, hash, salt)
+	str := EncodeBase64(paramId, hash, salt)
 	fmt.Print(str)
 }
 
@@ -59,7 +61,6 @@ func ExampleDecodeBase64() {
 		return
 	}
 	contexts[17] = ctx
-
 	user_password := []byte("bar")
 
 	paramId, hash, salt, err := DecodeBase64(db_string)
