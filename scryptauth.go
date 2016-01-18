@@ -33,12 +33,13 @@ const (
 	// Key length and salt length are 32 bytes (256 bits)
 	KeyLength = 32
 
-	// scrypt default parameters
+	// scrypt default parameters as used by New()
 	DefaultR = 8
 	DefaultP = 1
 )
 
-// Initialise Context struct
+// New creates a new Context struct. This is a convenience function to produce a context.
+// You might as well produce the Context struct yourself.
 func New(pwCost uint, hmacKey []byte) (*Context, error) {
 	if pwCost > 32 {
 		return nil, errors.New("scryptauth new() - invalid pwCost specified")
@@ -49,7 +50,8 @@ func New(pwCost uint, hmacKey []byte) (*Context, error) {
 	return &Context{HmacKey: hmacKey, PwCost: pwCost, R: DefaultR, P: DefaultP}, nil
 }
 
-// Create hash suitable for later invocation of Check()
+// Hash produces the hash using password and salt. This is used by Gen() and Check()
+// to generate/check password hashes.
 func (c *Context) Hash(password, salt []byte) (hash []byte, err error) {
 	scrypt_hash, err := scrypt.Key(password, salt, 1<<c.PwCost, c.R, c.P, KeyLength)
 	if err != nil {
@@ -63,7 +65,7 @@ func (c *Context) Hash(password, salt []byte) (hash []byte, err error) {
 	return
 }
 
-// Check / Verify password against hash/salt
+// Check verifies password against hash/salt
 func (c *Context) Check(hash, password, salt []byte) (chk bool, err error) {
 	result_hash, err := c.Hash(password, salt)
 	if err != nil {
@@ -75,7 +77,7 @@ func (c *Context) Check(hash, password, salt []byte) (chk bool, err error) {
 	return true, nil
 }
 
-// Generate hash and create new salt from crypto.rand
+// Gen generates hash for password using a new salt from crypto.rand
 func (c *Context) Gen(password []byte) (hash, salt []byte, err error) {
 	salt = make([]byte, KeyLength)
 	salt_length, err := rand.Read(salt)

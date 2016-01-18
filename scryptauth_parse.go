@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-// Parses "paramId:base64(hash):base64(salt)"
+// DecodeBase64 parses "paramId:base64(hash):base64(salt)"
 func DecodeBase64(str string) (paramId uint, hash, salt []byte, err error) {
 	tmp := strings.SplitN(str, ":", 3)
 	tmpParamId, err := strconv.ParseUint(tmp[0], 10, 0)
@@ -30,7 +30,7 @@ func DecodeBase64(str string) (paramId uint, hash, salt []byte, err error) {
 	return
 }
 
-// Encodes into "paramId:base64(hash):base64(salt)"
+// EncodeBase64 encodes into "paramId:base64(hash):base64(salt)"
 func EncodeBase64(paramId uint, hash, salt []byte) (str string) {
 	b64_salt := base64.URLEncoding.EncodeToString(salt)
 	b64_hash := base64.URLEncoding.EncodeToString(hash)
