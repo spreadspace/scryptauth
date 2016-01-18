@@ -41,7 +41,7 @@ const (
 // New creates a new Context struct. This is a convenience function to produce a context.
 // You might as well produce the Context struct yourself.
 func New(pwCost uint, hmacKey []byte) (*Context, error) {
-	if pwCost > 32 {
+	if pwCost > 31 {
 		return nil, errors.New("scryptauth new() - invalid pwCost specified")
 	}
 	if len(hmacKey) != KeyLength {
