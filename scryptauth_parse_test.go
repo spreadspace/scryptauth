@@ -15,8 +15,8 @@ func TestEncodeBase64(t *testing.T) {
 }
 
 func TestDecodeBase64(t *testing.T) {
-	paramId, hash, salt, err := DecodeBase64("17:QUFB:QUFB")
-	assert.Equal(t, paramId, uint(17))
+	ctxID, hash, salt, err := DecodeBase64("17:QUFB:QUFB")
+	assert.Equal(t, ctxID, uint(17))
 	assert.Equal(t, hash, []byte("AAA"))
 	assert.Equal(t, salt, []byte("AAA"))
 	assert.Equal(t, err, nil)
@@ -24,9 +24,9 @@ func TestDecodeBase64(t *testing.T) {
 
 func TestEncodeDecodeBase64(t *testing.T) {
 	str_ref := "17:3Tnrsg5-QaM7OsyRvqcBv9qS-jqGxzRIXQqvbTUf894=:HrHzQ4S016BffZ2TmwLRYYiIggfSmkwKdEtd1Pk_b-I="
-	paramId, hash, salt, err := DecodeBase64(str_ref)
+	ctxID, hash, salt, err := DecodeBase64(str_ref)
 	assert.Equal(t, err, nil)
-	str := EncodeBase64(paramId, hash, salt)
+	str := EncodeBase64(ctxID, hash, salt)
 	assert.Equal(t, str, str_ref)
 }
 
@@ -34,7 +34,7 @@ func TestEncodeDecodeBase64(t *testing.T) {
 func ExampleEncodeBase64() {
 	hmac_key := []byte("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA") // PLEASE CHANGE THIS KEY FOR PRODUCTION USE
 	pw_cost := uint(12)
-	paramId := uint(17)
+	ctxID := uint(17)
 	user_password := []byte("test123")
 
 	ctx, err := New(pw_cost, hmac_key)
@@ -47,7 +47,7 @@ func ExampleEncodeBase64() {
 		fmt.Print(err)
 		return
 	}
-	str := EncodeBase64(paramId, hash, salt)
+	str := EncodeBase64(ctxID, hash, salt)
 	fmt.Print(str)
 }
 
@@ -63,13 +63,13 @@ func ExampleDecodeBase64() {
 	contexts[17] = ctx
 	user_password := []byte("bar")
 
-	paramId, hash, salt, err := DecodeBase64(db_string)
+	ctxID, hash, salt, err := DecodeBase64(db_string)
 	if err != nil {
 		fmt.Print(err)
 		return
 	}
 
-	ok, err := contexts[paramId].Check(hash, user_password, salt)
+	ok, err := contexts[ctxID].Check(hash, user_password, salt)
 	if !ok {
 		fmt.Printf("Error wrong password for user (%s)", err)
 		return
