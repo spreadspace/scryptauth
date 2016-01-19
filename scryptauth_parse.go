@@ -11,12 +11,17 @@ import (
 // DecodeBase64 parses "ctxID:base64(hash):base64(salt)"
 func DecodeBase64(str string) (ctxID uint, hash, salt []byte, err error) {
 	tmp := strings.SplitN(str, ":", 3)
-	tmpParamId, err := strconv.ParseUint(tmp[0], 10, 0)
+	if len(tmp) != 3 {
+		err = errors.New("Error: invalid hash string")
+		return
+	}
+
+	tmpCtxID, err := strconv.ParseUint(tmp[0], 10, 0)
 	if err != nil {
 		err = errors.New("Error: parsing ctxID parameter")
 		return
 	}
-	ctxID = uint(tmpParamId)
+	ctxID = uint(tmpCtxID)
 	hash, err = base64.URLEncoding.DecodeString(tmp[1])
 	if err != nil {
 		err = errors.New("Error: decoding base64 hash")
